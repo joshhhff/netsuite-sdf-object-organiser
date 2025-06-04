@@ -36,9 +36,7 @@ This extension does not currently expose any configuration settings. Future vers
 
 ## 🐞 Known Issues
 
-- No object types defined in `manifest.xml` will result in an empty multi-select list.
 - No validation for existing project folders (can result in overwriting manually).
-- Visual styling of the multi-select dropdown is currently limited by VS Code’s API.
 
 ---
 
@@ -48,8 +46,7 @@ This extension does not currently expose any configuration settings. Future vers
 
 - Initial release
 - Detects NetSuite SDF projects
-- Allows users to select object types
-- Organises selected object types into a subfolder under `src/Objects`
+- Allows users to quickly create sub-folders under the `src/Objects` directory, and select which object types to have sub-folders for
 
 ---
 
@@ -68,7 +65,7 @@ Issues, pull requests, and feedback are welcome! Please ensure contributions fol
 
 ## 📄 License
 
-MIT © Josh Ford
+© [Josh Ford](htttps://joshford.co.uk)
 
 ---
 

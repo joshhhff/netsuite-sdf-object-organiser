@@ -1,11 +1,5 @@
 # Changelog
 
-All notable changes to the **netsuite-sdf-object-organiser** extension will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-## [Unreleased]
-
 ## [1.0.0] - 2025-06-04
 ### Added
 - Initial release of the NetSuite SDF Object Organiser VS Code extension.
