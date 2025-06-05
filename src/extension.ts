@@ -1,17 +1,16 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import { createFolder, validateNetSuiteProjectStructure } from './commands/shared/functions'
+import { ObjectTypes } from './commands/shared/enums';
+import { getAllXmlFilesInObjectsFolder, getSubfolderUrisOfObjects, organiseXMlFilesIntoObjectTypes } from './commands/cleanUpXmlObjects/functions';
 
 export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
+	// this code inside the 'activate' function is only run when the extension is activated
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+    // the commands are registered in package.json
 	const disposable = vscode.commands.registerCommand('netsuite-sdf-object-organiser.createOrganisedStructure', async () => {
-		// Display a message box to the user
-		//vscode.window.showInformationMessage('Hello World from NetSuite SDF Object Organiser!');
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-
+        const workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+        // check the workspace is a valid netsuite sdf project
         const isValidWorkspace: boolean = await validateNetSuiteProjectStructure(workspaceFolders);
 
         if (!isValidWorkspace) {
@@ -22,86 +21,53 @@ export function activate(context: vscode.ExtensionContext) {
             const folderName = await vscode.window.showInputBox({
                 placeHolder: 'Enter the folder name to create in the Objects folder',
                 prompt: 'Folder Name',
-                validateInput: (input) => {
+                validateInput: async (input) => {
                     if (!input || input.trim() === '') {
                         return 'Folder name cannot be empty.';
-                    }}
+                    }
+
+                    const folderUri = vscode.Uri.joinPath(workspaceFolders[0].uri, 'src', 'Objects', input.trim());
+
+                    try {
+                        const stat = await vscode.workspace.fs.stat(folderUri);
+                        if (stat.type === vscode.FileType.Directory) {
+                            return 'Folder already exists.';
+                        }
+                    } catch (error) {
+                        // folder doesn't exist
+                        return undefined;
+                    }
+
+                    return undefined;
+                }
             });
 
             if (folderName) {
-                const objectTypesForSelection = [
-                    'Address Form',
-                    'Advanced PDF HTML Template',
-                    'Bundle Installation Script',
-                    'Center',
-                    'Center Category',
-                    'Center Link',
-                    'Center Tab',
-                    'Client Script',
-                    'CRM Custom Field',
-                    'Custom List',
-                    'Custom Record Action Script',
-                    'Custom Record Type',
-                    'Custom Segment',
-                    'Custom Transaction Type',
-                    'Dataset',
-                    'Email Template',
-                    'Entity Custom Field',
-                    'Entry Form',
-                    'Integration',
-                    'Item Custom Field',
-                    'Item Number Custom Field',
-                    'Item Option Custom Field',
-                    'KPI Scorecard',
-                    'Map Reduce Script',
-                    'Mass Update Script',
-                    'Other Custom Field',
-                    'Portlet',
-                    'RESTlet',
-                    'Role',
-                    'Saved CSV Import',
-                    'Saved Search',
-                    'Scheduled Script',
-                    'SDF Installation Script',
-                    'API Secrets',
-                    'Sublist',
-                    'Subtab',
-                    'Suitelet',
-                    'Transaction Form',
-                    'Transaction Body Custom Field',
-                    'Transaction Column Custom Field',
-                    'User Event Script',
-                    'Workflow',
-                    'Workflow Action Script',
-                ]
+                const objectTypesArray: string[] = Object.values(ObjectTypes)
     
-                const objectTypes = await vscode.window.showQuickPick(objectTypesForSelection, {
+                const objectTypes = await vscode.window.showQuickPick(objectTypesArray, {
                     placeHolder: 'Select at least one option',
                     canPickMany: true,
                 });
     
-                console.log(`Creating organised structure in Objects folder with name: ${folderName}`);
-    
                 if (!objectTypes || objectTypes.length === 0) {
                     // user decided not to create sub object types
                     const rootUri = workspaceFolders[0].uri;
-                    console.log('creating folder at', rootUri)
     
-                    const newFolderUri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', folderName);
+                    const newFolderUri: vscode.Uri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', folderName);
                     await createFolder(newFolderUri);
                 } else {
     
                     const rootUri = workspaceFolders[0].uri;
     
                     // create the main folder in the Objects folder
-                    const newFolderUri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', folderName);
+                    const newFolderUri: vscode.Uri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', folderName);
                     await createFolder(newFolderUri);    // create the project folder underneath the Objects folder
     
                     // create subfolders in the project folder for each selected object type
                     objectTypes.forEach(async (type) => {
-                        console.log(`Creating folder for object type: ${type}`);
     
-                        const typeFolderUri = vscode.Uri.joinPath(newFolderUri, type);
+                        const typeFolderUri: vscode.Uri = vscode.Uri.joinPath(newFolderUri, type);
                         await createFolder(typeFolderUri);
                     })
                 }
@@ -110,51 +76,138 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
-}
 
-async function createFolder(uri: vscode.Uri) {
-    try {
-        await vscode.workspace.fs.createDirectory(uri);
-        vscode.window.showInformationMessage(`Folder created at ${uri.fsPath}`);
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to create folder: ${(error as Error).message}`);
-    }
-}
+    const disposable2 = vscode.commands.registerCommand('netsuite-sdf-object-organiser.cleanUpXmlObjects', async () => {
+        try {
+            const workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
 
-async function validateNetSuiteProjectStructure(workspaceFolders: any): Promise<boolean> {
-    if (!workspaceFolders || workspaceFolders.length === 0) {
-        vscode.window.showErrorMessage('No workspace folder is open.');
-        return false;
-    }
+            const isValidWorkspace: boolean = await validateNetSuiteProjectStructure(workspaceFolders);
 
-    const rootUri = workspaceFolders[0].uri;
+            if (!isValidWorkspace) {
+                vscode.window.showErrorMessage('The current workspace is not a valid NetSuite SDF project. Please ensure you are in the correct directory with the required setup provided through the NetSuite SuiteCloud Development Framework (SDF) tools.');
+                return;
+            } else if (isValidWorkspace && workspaceFolders && workspaceFolders.length > 0) {
+                const allXmlObjectFiles: vscode.Uri[] = await getAllXmlFilesInObjectsFolder();
 
-    const pathsToCheck = [
-        vscode.Uri.joinPath(rootUri, 'suitecloud.config.js'),
-        vscode.Uri.joinPath(rootUri, 'src'),
-        vscode.Uri.joinPath(rootUri, 'src', 'deploy.xml'),
-        vscode.Uri.joinPath(rootUri, 'src', 'manifest.xml'),
-        vscode.Uri.joinPath(rootUri, 'src', 'Objects')
-    ];
+                // ask the user which xml files to organise
+                const selectedFiles = await vscode.window.showQuickPick(allXmlObjectFiles.map(file => ({
+                    label: path.basename(file.fsPath),
+                    uri: file
+                })), {
+                    placeHolder: 'Select which SDF XML objects to organise',
+                    canPickMany: true,
+                });
 
-    try {
-        for (const uri of pathsToCheck) {
-            const stat = await vscode.workspace.fs.stat(uri);
-            const isDir = uri.path.endsWith('/') || uri.path.endsWith('src') || uri.path.endsWith('Objects');
-            if (isDir && stat.type !== vscode.FileType.Directory) {
-                vscode.window.showErrorMessage(`Expected a folder: ${uri.fsPath}`);
-                return false;
-            } else if (!isDir && stat.type !== vscode.FileType.File) {
-                vscode.window.showErrorMessage(`Expected a file: ${uri.fsPath}`);
-                return false;
+                if (!selectedFiles || selectedFiles.length === 0) {
+                    vscode.window.showWarningMessage('No SDF XML objects selected');
+                    return;
+                }
+
+                const options: string[] = ['Create New Folder', 'Organise into Existing Folder'];
+
+                const newOrCurrentFolder = await vscode.window.showQuickPick(options, {
+                    placeHolder: 'Create a new folder or organise into an existing folder?',
+                });
+
+                if (!newOrCurrentFolder) {
+                    vscode.window.showWarningMessage('No action selected');
+                    return;
+                }
+
+                let projectFolderUri: vscode.Uri | null = null;
+                
+                if (newOrCurrentFolder === 'Create New Folder') {
+                    const folderName = await vscode.window.showInputBox({
+                        placeHolder: 'Enter the folder name to create in the Objects folder',
+                        prompt: 'Folder Name',
+                        validateInput: async (input) => {
+                            if (!input || input.trim() === '') {
+                                return 'Folder name cannot be empty.';
+                            }
+                            const folderUri = vscode.Uri.joinPath(workspaceFolders[0].uri, 'src', 'Objects', input.trim());
+
+                            try {
+                                const stat = await vscode.workspace.fs.stat(folderUri);
+                                if (stat.type === vscode.FileType.Directory) {
+                                    return 'Folder already exists.';
+                                }
+                            } catch (error) {
+                                // folder doesn't exist
+                                return undefined;
+                            }
+
+                            return undefined;
+                        }
+                    });
+
+                    if (!folderName) return;    // should never trigger due to validateInput, but typescript demands undefined check
+
+                    const rootUri: vscode.Uri = workspaceFolders[0].uri;
+                    console.log('creating folder at', rootUri)
+    
+                    const newFolderUri: vscode.Uri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', folderName);
+                    await createFolder(newFolderUri);
+
+                    projectFolderUri = newFolderUri; // set the project folder URI to the newly created folder
+                    
+                } else if (newOrCurrentFolder === 'Organise into Existing Folder') {
+                    const subfoldersUris: vscode.Uri[] = await getSubfolderUrisOfObjects();
+
+                    if (subfoldersUris.length === 0) {
+                        vscode.window.showWarningMessage('No subfolders found in the Objects folder. Please create a folder first.');
+                        return;
+                    }
+                    
+                    const subfolders: { label: string, uri: vscode.Uri }[] = subfoldersUris.map(uri => ({
+                        label: path.basename(uri.fsPath),
+                        uri: uri
+                    }));
+
+                    const selectedFolder = await vscode.window.showQuickPick(subfolders, {
+                        placeHolder: 'Select a folder to organise the files into',
+                    });
+
+                    if (!selectedFolder) {
+                        vscode.window.showWarningMessage('No folder selected to organise files into');
+                        return;
+                    } else {
+                        console.log(`Selected folder to organise files into: ${selectedFolder.label}`);
+                    }
+
+                    projectFolderUri = selectedFolder.uri; // set the project folder URI to the selected folder
+
+                } else {
+                    vscode.window.showErrorMessage('Invalid selection. Please try again.');
+                }
+
+                // if we have a project folder URI to work with, proceed to organsising the XML files
+                if (projectFolderUri) {
+                    const organisedFiles = await organiseXMlFilesIntoObjectTypes(selectedFiles.map(file => file.uri));
+                    const rootUri = workspaceFolders[0].uri;
+
+                    const folderToPlaceFilesInto: vscode.Uri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', path.basename(projectFolderUri.fsPath));
+
+                    organisedFiles.forEach(async (objectType: any) => {
+                        const objectTypeFolderUri: vscode.Uri = vscode.Uri.joinPath(folderToPlaceFilesInto, objectType.objectType);
+                        
+                        // create the folder for the object type if it doesn't exist
+                        await createFolder(objectTypeFolderUri);
+
+                        // move each file into the corresponding object type folder
+                        for (const file of objectType.files) {
+                            const newFileUri: vscode.Uri = vscode.Uri.joinPath(objectTypeFolderUri, path.basename(file.uri.fsPath));
+                            await vscode.workspace.fs.rename(file.uri, newFileUri, { overwrite: true });
+                        }
+                    });
+                    vscode.window.showInformationMessage('XML files organised successfully!');
+                }
             }
+        } catch (error) {
+            console.error('Error during XML cleanup command', error);
         }
+    });
 
-        return true;
-    } catch (error) {
-        vscode.window.showErrorMessage(`Error checking project structure: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        return false;
-    }
+    context.subscriptions.push(disposable2);
 }
 
 // This method is called when your extension is deactivated

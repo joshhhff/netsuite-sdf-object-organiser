@@ -9,7 +9,7 @@ NetSuite SDF Object Organiser is a Visual Studio Code extension that helps you o
 - Detects if the current workspace is a valid NetSuite SDF project.
 - Allows you to create a project folder within the `src/Objects` directory.
 - Presents a multi-select list of available NetSuite object types.
-- Automatically organises selected object types under the newly created project folder.
+- Group SDF XML files and move them into meaningful directories just by clicking a few buttons
 
 ---
 
@@ -34,38 +34,27 @@ This extension does not currently expose any configuration settings. Future vers
 
 ---
 
-## 🐞 Known Issues
+## 📝 Latest Release
 
-- No validation for existing project folders (can result in overwriting manually).
+### v1.1.0
 
----
-
-## 📝 Release Notes
-
-### 1.0.0
-
-- Initial release
-- Detects NetSuite SDF projects
-- Allows users to quickly create sub-folders under the `src/Objects` directory, and select which object types to have sub-folders for
-
----
-
-## 📚 Resources
-
-- [SuiteCloud CLI Documentation](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/section_156851404491.html)
-- [VS Code Extension API](https://code.visualstudio.com/api)
+- Users can now "clean up" their SDF XML objects
+    - Users will select which files they want to "clean"
+    - Users will then be prompted to create a new sub-folder under `src/Objects` or place them into an existing folder
+    - Files will be automatically moved into the chosen sub-folder, and objects will be placed into meaningful folders
+        - e.g: An object which represents a custom field for Sales Orders will be automatically placed into `Transaction Body Custom Fields` 
 
 ---
 
 ## ✅ Contributing
 
-Issues, pull requests, and feedback are welcome! Please ensure contributions follow [VS Code extension guidelines](https://code.visualstudio.com/api/references/extension-guidelines).
+Issues, pull requests, and feedback are welcome!
 
 ---
 
 ## 📄 License
 
-© [Josh Ford](htttps://joshford.co.uk)
+© [Josh Ford](https://joshford.co.uk)
 
 ---
 
