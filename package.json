@@ -5,6 +5,11 @@
   "description": "",
   "version": "1.1.0",
   "icon": "assets/joshford-software-logo-circle.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshhhff/netsuite-sdf-object-organiser.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.100.0"
   },
