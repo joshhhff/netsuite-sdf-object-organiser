@@ -17,8 +17,6 @@
 ## 1.0.0 - Release
 - Initial release
 
-
-
 ## 1.1.0 - Clean up command
 - Users can now "clean up" their SDF XML objects
     - Users will select which files they want to "clean"
@@ -27,4 +25,7 @@
         - e.g: An object which represents a custom field for Sales Orders will be automatically placed into `Transaction Body Custom Fields` 
 
 ## 1.1.1
-- Bug fixes
+- When creating new folders, the extension now checks for existing folders with the same name to prevent duplicates/overwriting.
+
+## 1.1.2
+- Bug Fixes
