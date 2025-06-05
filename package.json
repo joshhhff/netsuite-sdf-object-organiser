@@ -2,9 +2,21 @@
   "name": "netsuite-sdf-object-organiser",
   "publisher": "JoshFord",
   "displayName": "NetSuite SDF Object Organiser",
-  "description": "",
   "version": "1.1.1",
   "icon": "assets/joshford-software-logo-circle.png",
+  "description": "Easily organise and clean up SDF XML objects in NetSuite SDF Account Customisation projects.",
+  "keywords": [
+    "netsuite",
+    "sdf",
+    "object",
+    "organiser",
+    "folder",
+    "structure",
+    "xml",
+    "clean",
+    "customisation",
+    "project"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/joshhhff/netsuite-sdf-object-organiser.git"
