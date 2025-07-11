@@ -88,19 +88,38 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             } else if (isValidWorkspace && workspaceFolders && workspaceFolders.length > 0) {
                 const allXmlObjectFiles: vscode.Uri[] = await getAllXmlFilesInObjectsFolder();
+                // Prepare quick pick items, with "Select All" as the first option
+                const quickPickItems = [
+                    { label: `Organise all ${allXmlObjectFiles.length} files`, uri: null as unknown as vscode.Uri },
+                    ...allXmlObjectFiles.map(file => ({
+                        label: path.basename(file.fsPath),
+                        uri: file
+                    }))
+                ];
 
                 // ask the user which xml files to organise
-                const selectedFiles = await vscode.window.showQuickPick(allXmlObjectFiles.map(file => ({
-                    label: path.basename(file.fsPath),
-                    uri: file
+                const selectedFiles = await vscode.window.showQuickPick(quickPickItems.map(file => ({
+                    label: file.label,
+                    uri: file.uri
                 })), {
                     placeHolder: 'Select which SDF XML objects to organise',
                     canPickMany: true,
                 });
 
+                console.log('selectedFiles', selectedFiles);
+                
                 if (!selectedFiles || selectedFiles.length === 0) {
                     vscode.window.showWarningMessage('No SDF XML objects selected');
                     return;
+                }
+
+                let organiseAllFiles: boolean = false;
+                
+                if (selectedFiles.length > 1 && selectedFiles[0].label === 'Organise all files') {
+                    vscode.window.showWarningMessage('You cannot select "Organise all files" and other files at the same time. Please select either "Organise all files" or individual files.');
+                    return;
+                } else if (selectedFiles.length === 1 && selectedFiles[0].label === `Organise all ${allXmlObjectFiles.length} files`) {
+                    organiseAllFiles = true; // user selected "Organise all files"
                 }
 
                 const options: string[] = ['Create New Folder', 'Organise into Existing Folder'];
@@ -182,7 +201,10 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // if we have a project folder URI to work with, proceed to organsising the XML files
                 if (projectFolderUri) {
-                    const organisedFiles = await organiseXMlFilesIntoObjectTypes(selectedFiles.map(file => file.uri));
+                    const organisedFiles = await organiseXMlFilesIntoObjectTypes(
+                        organiseAllFiles ? allXmlObjectFiles.map(file => file) :
+                        selectedFiles.map(file => file.uri)
+                    );
                     const rootUri = workspaceFolders[0].uri;
 
                     const folderToPlaceFilesInto: vscode.Uri = vscode.Uri.joinPath(rootUri, 'src', 'Objects', path.basename(projectFolderUri.fsPath));

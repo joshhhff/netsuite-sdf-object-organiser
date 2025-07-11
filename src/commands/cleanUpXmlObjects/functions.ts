@@ -62,10 +62,7 @@ export async function getSubfolderUrisOfObjects(): Promise<vscode.Uri[]> {
  * 
  */
 export async function organiseXMlFilesIntoObjectTypes(xmlFiles: vscode.Uri[]): Promise<any> {
-    enum ObjectType {
-        addressForm = 'Address Form',
-        advancedpdftemplate = 'Advanced PDF HTML Template'
-    }
+    
     async function getFirstXmlTagName(fileUri: vscode.Uri): Promise<string | null> {
         const raw = await vscode.workspace.fs.readFile(fileUri);
         const xmlText = Buffer.from(raw).toString('utf8');

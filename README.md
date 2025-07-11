@@ -36,16 +36,8 @@ This extension does not currently expose any configuration settings. Future vers
 
 ## 📝 Latest Release
 
-### v1.1.0
-- Users can now "clean up" their SDF XML objects
-    - Users will select which files they want to "clean"
-    - Users will then be prompted to create a new sub-folder under `src/Objects` or place them into an existing folder
-    - Files will be automatically moved into the chosen sub-folder, and objects will be placed into meaningful folders
-        - e.g: An object which represents a custom field for Sales Orders will be automatically placed into `Transaction Body Custom Fields` 
-
-### v1.1.1
-- Bug fixes
----
+## 1.2.0
+- "Organise all" option is now available when cleaning up XML objects. This allows users to quickly and easily organise all objects that they have in their SDF project
 
 ## ✅ Contributing
 
