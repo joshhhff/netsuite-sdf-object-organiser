@@ -39,6 +39,9 @@ This extension does not currently expose any configuration settings. Future vers
 ## 1.2.0
 - "Organise all" option is now available when cleaning up XML objects. This allows users to quickly and easily organise all objects that they have in their SDF project
 
+## 1.2.1
+- Bug fixes
+
 ## ✅ Contributing
 
 Issues, pull requests, and feedback are welcome!

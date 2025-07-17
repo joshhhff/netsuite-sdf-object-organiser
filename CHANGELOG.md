@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1
+- Bug fixes
+
 ## 1.2.0
 - "Organise all" option is now available when cleaning up XML objects. This allows users to quickly and easily organise all objects that they have in their SDF project
 

@@ -17,7 +17,7 @@ export enum ObjectTypes {
     dataset = 'Dataset',
     emailtemplate = 'Email Template',
     entitycustomfield = 'Entity Custom Field',
-    entryform = 'Entry Form',
+    entryForm = 'Entry Form',
     integration = 'Integration',
     itemcustomfield = 'Item Custom Field',
     itemnumbercustomfield = 'Item Number Custom Field',
