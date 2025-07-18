@@ -6,7 +6,7 @@ export enum ObjectTypes {
     bundleinstallationscript = 'Bundle Installation Script',
     center = 'Center',
     centercategory = 'Center Category',
-    canterlink = 'Center Link',
+    centerlink = 'Center Link',
     centertab = 'Center Tab',
     clientscript = 'Client Script',
     customlist = 'Custom List',

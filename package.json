@@ -2,7 +2,7 @@
   "name": "netsuite-sdf-object-organiser",
   "publisher": "JoshFord",
   "displayName": "NetSuite SDF Object Organiser",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "icon": "assets/joshford-software-logo-circle.png",
   "description": "Easily organise and clean up SDF XML objects in NetSuite SDF Account Customisation projects.",
   "keywords": [
