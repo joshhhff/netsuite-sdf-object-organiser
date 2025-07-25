@@ -36,11 +36,10 @@ This extension does not currently expose any configuration settings. Future vers
 
 ## 📝 Latest Release
 
-## 1.2.0
-- "Organise all" option is now available when cleaning up XML objects. This allows users to quickly and easily organise all objects that they have in their SDF project
-
-## 1.2.2
-- Bug fixes
+## 1.3.0 - New Commands!
+- "Add Object Reference to Deploy File" & "Refresh Object References in Deploy File" commands are now available
+- "Add Object Reference to Deploy File" allows users to select an XML file from their project to automatically add to the `deploy.xml` file. Once importing an object through the SuiteCloud Development Framework extension, use this command to quickly add the object reference!
+- "Refresh Object References in Deploy File" allows users to ensure that the file path of the objects defined in the `deploy.xml` file are correct. Once organising your files, you can run this command to quickly update the file path if it has changed since adding to the file! This will also remove any object references that do not exist in your current project, making it easy to ensure that you are only referencing objects that actually exist.
 
 ## ✅ Contributing
 

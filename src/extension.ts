@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { createFolder, validateNetSuiteProjectStructure } from './commands/shared/functions'
+import { createFolder, validateNetSuiteProjectStructure, addObjectReferences, refreshObjectReferences } from './commands/shared/functions'
 import { ObjectTypes } from './commands/shared/enums';
 import { getAllXmlFilesInObjectsFolder, getSubfolderUrisOfObjects, organiseXMlFilesIntoObjectTypes } from './commands/cleanUpXmlObjects/functions';
 
@@ -230,6 +230,64 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(disposable2);
+
+    const disposable3 = vscode.commands.registerCommand('netsuite-sdf-object-organiser.addObjectReference', async () => {
+        try {
+            const workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+
+            const isValidWorkspace: boolean = await validateNetSuiteProjectStructure(workspaceFolders);
+
+            if (!isValidWorkspace) {
+                vscode.window.showErrorMessage('The current workspace is not a valid NetSuite SDF project. Please ensure you are in the correct directory with the required setup provided through the NetSuite SuiteCloud Development Framework (SDF) tools.');
+                return;
+            } else if (isValidWorkspace && workspaceFolders && workspaceFolders.length > 0) {
+                const allXmlObjectFiles: vscode.Uri[] = await getAllXmlFilesInObjectsFolder();
+                console.log('allXmlObjectFiles', allXmlObjectFiles);
+
+
+                // ask the user which xml files to organise
+                const selectedFiles = await vscode.window.showQuickPick(allXmlObjectFiles.map(file => ({
+                    label: path.basename(file.fsPath),
+                    uri: file
+                })), {
+                    placeHolder: 'Select which XML objects to add reference to deploy file',
+                    canPickMany: true,
+                });
+
+                console.log('selectedFiles', selectedFiles);
+                
+                if (!selectedFiles || selectedFiles.length === 0) {
+                    vscode.window.showWarningMessage('No SDF XML objects selected');
+                    return;
+                }
+
+                await addObjectReferences(selectedFiles.map(file => file.uri));
+            }
+        } catch (error) {
+            console.error('Error during add object reference command', error);
+        }
+    });
+
+    context.subscriptions.push(disposable3);
+
+    const disposable4 = vscode.commands.registerCommand('netsuite-sdf-object-organiser.refreshDeployFile', async () => {
+        try {
+            const workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+
+            const isValidWorkspace: boolean = await validateNetSuiteProjectStructure(workspaceFolders);
+
+            if (!isValidWorkspace) {
+                vscode.window.showErrorMessage('The current workspace is not a valid NetSuite SDF project. Please ensure you are in the correct directory with the required setup provided through the NetSuite SuiteCloud Development Framework (SDF) tools.');
+                return;
+            } else if (isValidWorkspace && workspaceFolders && workspaceFolders.length > 0) {
+                await refreshObjectReferences();
+            }
+        } catch (error) {
+            console.error('Error during add object reference command', error);
+        }
+    });
+
+    context.subscriptions.push(disposable4);
 }
 
 // This method is called when your extension is deactivated
